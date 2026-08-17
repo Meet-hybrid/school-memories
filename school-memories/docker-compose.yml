@@ -1,0 +1,51 @@
+version: "3.8"
+
+# Local development stack: PostgreSQL + Spring Boot API + Next.js frontend.
+#   docker-compose up --build
+#   frontend: http://localhost:3000   backend API: http://localhost:8080
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: keepsake
+      POSTGRES_PASSWORD: keepsake
+      POSTGRES_DB: keepsake
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keepsake -d keepsake"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/keepsake
+      DB_USER: keepsake
+      DB_PASSWORD: keepsake
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please-0123456789abcdef}
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  uploads:

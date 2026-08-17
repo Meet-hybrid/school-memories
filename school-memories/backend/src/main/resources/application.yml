@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: keepsake-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/keepsake}
+    username: ${DB_USER:keepsake}
+    password: ${DB_PASSWORD:keepsake}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 20MB
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${PORT:8080}
+
+keepsake:
+  jwt:
+    # Override in production with a long random value via the JWT_SECRET env var.
+    secret: ${JWT_SECRET:dev-only-secret-please-override-in-production-0123456789abcdef}
+    expiration-ms: ${JWT_EXPIRATION_MS:604800000} # 7 days
+  upload-dir: ${UPLOAD_DIR:./data/uploads}
+  # When true, verification / password-reset links are returned by the API and
+  # logged to the console instead of emailed. Switches to a real mail sender later.
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+
+logging:
+  level:
+    org.springframework.security: WARN
+    com.keepsake: INFO

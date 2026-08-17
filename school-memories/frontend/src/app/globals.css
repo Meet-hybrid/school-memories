@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --paper: 250 247 241;
+    --paper-deep: 243 238 228;
+    --ink: 33 29 25;
+    --ink-soft: 87 81 74;
+    --ink-faint: 138 131 122;
+    --clay: 166 85 47;
+    --clay-deep: 138 68 35;
+    --clay-soft: 201 122 82;
+    --moss: 92 107 69;
+    --line: 228 220 205;
+    --surface: 255 255 255;
+    color-scheme: light;
+  }
+
+  /* Dark mode: warm charcoal paper, warm light ink. Clay brightens for contrast. */
+  .dark {
+    --paper: 27 24 21;
+    --paper-deep: 22 19 17;
+    --ink: 235 229 218;
+    --ink-soft: 186 177 163;
+    --ink-faint: 141 133 120;
+    --clay: 214 138 95;
+    --clay-deep: 191 112 70;
+    --clay-soft: 234 171 130;
+    --moss: 154 170 121;
+    --line: 60 53 45;
+    --surface: 34 30 26;
+    color-scheme: dark;
+  }
+
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-paper text-ink font-sans transition-colors duration-200;
+  }
+  ::selection {
+    @apply bg-clay/20 text-ink;
+  }
+}
+
+@layer components {
+  .label {
+    @apply text-[0.7rem] font-medium uppercase tracking-wide2 text-ink/50;
+  }
+  .hairline {
+    @apply border-t border-line;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-paper hover:bg-clay;
+  }
+  .btn-outline {
+    @apply btn border border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper;
+  }
+  .btn-quiet {
+    @apply btn text-ink/70 hover:text-ink hover:bg-ink/5;
+  }
+  .input {
+    @apply w-full rounded-sm border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-ink/35 focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20;
+  }
+  .prose-memory {
+    @apply text-[1.02rem] leading-7 text-ink/90;
+  }
+}

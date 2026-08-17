@@ -1,0 +1,9 @@
+# local dev data (postgres cluster, uploads, logs)
+.dev/
+backend/data/
+backend/target/
+frontend/node_modules/
+frontend/.next/
+*.log
+.env
+.env.local

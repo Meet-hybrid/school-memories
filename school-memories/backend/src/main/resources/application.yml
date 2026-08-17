@@ -18,11 +18,25 @@ spring:
       max-request-size: 20MB
   jackson:
     default-property-inclusion: non_null
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
   port: ${PORT:8080}
 
 keepsake:
+  # Public origin of the frontend — used to build absolute links inside emails.
+  app:
+    base-url: ${APP_BASE_URL:http://localhost:3000}
   jwt:
     # Override in production with a long random value via the JWT_SECRET env var.
     secret: ${JWT_SECRET:dev-only-secret-please-override-in-production-0123456789abcdef}
@@ -31,10 +45,12 @@ keepsake:
   # Google sign-in. Leave GOOGLE_CLIENT_ID unset to hide the button.
   google:
     client-id: ${GOOGLE_CLIENT_ID:}
-  # When true, verification / password-reset links are returned by the API and
-  # logged to the console instead of emailed. Switches to a real mail sender later.
+  # When true, verification / password-reset links are emailed via spring.mail.*
+  # (SMTP_HOST/SMTP_PORT/SMTP_USERNAME/SMTP_PASSWORD). When false, they are
+  # returned by the API and logged to the console instead.
   mail:
     enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:}
 
 logging:
   level:

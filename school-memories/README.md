@@ -19,6 +19,7 @@ loud and competitive.
 | --- | --- |
 | Authentication (register, login, logout, email verify, password reset, JWT, roles) | ✅ |
 | Google sign-in (Identity Services ID tokens, verified locally against Google JWKS) | ✅ |
+| Email delivery (SMTP via spring-boot-starter-mail; console-log mode in dev) | ✅ |
 | User profiles (photo, name, nickname, school, set, grad year, bio, stats) | ✅ |
 | 30-day challenge (configurable questions, answer any day, edit/delete, progress) | ✅ |
 | Memory posts (text, photo/video upload, mood, soft-delete) | ✅ |
@@ -35,7 +36,7 @@ loud and competitive.
 | Integration tests (auth, challenge, social, admin) | ✅ |
 
 **Planned but deliberately not built yet** (marked in the roadmap at the bottom, not faked):
-real SMTP email, Guess-Who/Trivia/Bingo games, polls, throwback photo
+Guess-Who/Trivia/Bingo games, polls, throwback photo
 contests, Memory of the Week, digital yearbook generation, time capsules, reunion
 planning, interactive school maps, multi-school theming, PDF generation.
 
@@ -116,8 +117,10 @@ memories, and an admin:
 | Admin | `admin@greenfield.demo` | `password123` |
 | Classmate | `ada@greenfield.demo` (also `bisi@`, `chidi@`, `dani@`, `emeka@`, `fatima@`, `george@`, `hana@`) | `password123` |
 
-Email verification and password-reset links are logged to the backend console (no SMTP
-in the MVP); the verify/reset pages work end-to-end against those links.
+Email verification and password-reset links are logged to the backend console by
+default; set `MAIL_ENABLED=true` plus `SMTP_HOST`/`SMTP_PORT`/`SMTP_USERNAME`/
+`SMTP_PASSWORD`/`MAIL_FROM` (and `APP_BASE_URL`) to deliver them for real. The
+verify/reset pages work end-to-end against the links either way.
 
 ---
 
@@ -173,9 +176,10 @@ school-memories/
    upgrade path is an `httpOnly` cookie + CSRF handling, which can be added without
    changing the API surface.
 
-5. **Dev-mode mail.** `MailService` logs verification/reset links when `MAIL_ENABLED`
-   is false (the default), so the full flows are testable without SMTP. A real sender
-   (SMTP/SES/Postmark) drops in behind the same interface.
+5. **Swappable mail.** `MailService` sends via Spring's `JavaMailSender` (SMTP)
+   when `MAIL_ENABLED` is true; otherwise it logs verification/reset links to the
+   console and the API returns them, so the full flows are testable without SMTP.
+   A hosted sender (SES/Postmark) drops in behind the same interface.
 
 6. **Files on disk via `FileStorageService`.** Media URLs are stored in Postgres; the
    bytes live under `UPLOAD_DIR` and are served at `/uploads/*`. Swapping to S3/GCS is
@@ -256,13 +260,14 @@ timeline) is built to pull people toward reading and writing memories.
 submissions, feed, likes, comments, uploads, follow, notifications, achievements,
 leaderboards, search, admin dashboard, Docker, tests, docs.
 
-**Version 2 — planned:** real email delivery, memory games (Guess Who,
+**Version 2 — planned:** memory games (Guess Who,
 Guess the Teacher, School Trivia, School Bingo), polls, throwback photo contest,
 Memory of the Week, yearbook builder (v1), better moderation tooling, media pipeline
 improvements (thumbnails, video transcoding, S3 storage).
 
 **Version 2 — shipped so far:** Google OAuth (local JWKS verification, button on
-login/register, one-time school onboarding).
+login/register, one-time school onboarding); real email delivery (SMTP, HTML
+verification/reset emails with absolute links).
 
 **Version 3 — planned:** digital yearbook PDF, time capsules, reunion planning
 (countdown + RSVP), interactive school map with memories pinned to locations, advanced
@@ -272,7 +277,8 @@ analytics, multi-school theming.
 
 ## Known MVP limitations (honest list)
 
-- Email is log-only; no real delivery yet.
+- Email needs SMTP credentials configured (`MAIL_ENABLED=true` + `SMTP_*`) to go
+  beyond console logging.
 - No CSRF concerns because auth is header-based; JWT lives in `localStorage` (see
   decision #4).
 - Feed pagination exists but the UI loads one page; profile loads all memories.

@@ -89,8 +89,11 @@ public class AuthService {
         user.setVerificationTokenExpiry(Instant.now().plus(24, ChronoUnit.HOURS));
         userRepository.save(user);
 
-        String verifyLink = "/verify-email?token=" + user.getEmailVerificationToken();
-        mailService.sendVerificationLink(email, verifyLink);
+        String verifyPath = "/verify-email?token=" + user.getEmailVerificationToken();
+        mailService.sendVerificationLink(email, verifyPath);
+        // The link is only returned by the API in dev mode (mail disabled);
+        // with real mail the user receives it in their inbox instead.
+        String verifyLink = mailService.isEnabled() ? null : verifyPath;
 
         String token = jwtService.generateToken(user.getId(), user.getRole().name());
         return new AuthResponse(token, AuthResponse.identity(user), verifyLink);

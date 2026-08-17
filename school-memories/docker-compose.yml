@@ -30,6 +30,13 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please-0123456789abcdef}
       UPLOAD_DIR: /data/uploads
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
     volumes:
       - uploads:/data/uploads
     depends_on:

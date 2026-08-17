@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.keepsake.backend.common.ApiException;
-import com.keepsake.backend.common.FileStorageService;
+import com.keepsake.backend.common.MediaProcessor;
 import com.keepsake.backend.common.PageResponse;
 import com.keepsake.backend.user.User;
 import com.keepsake.backend.user.UserRepository;
@@ -34,13 +34,13 @@ public class MemoryController {
 
     private final MemoryService memoryService;
     private final UserRepository userRepository;
-    private final FileStorageService fileStorageService;
+    private final MediaProcessor mediaProcessor;
 
     public MemoryController(MemoryService memoryService, UserRepository userRepository,
-                            FileStorageService fileStorageService) {
+                            MediaProcessor mediaProcessor) {
         this.memoryService = memoryService;
         this.userRepository = userRepository;
-        this.fileStorageService = fileStorageService;
+        this.mediaProcessor = mediaProcessor;
     }
 
     @GetMapping
@@ -69,8 +69,11 @@ public class MemoryController {
                             @RequestParam(value = "mood", required = false) String mood,
                             @RequestPart(value = "file", required = false) MultipartFile file) {
         User user = currentUser(auth);
-        Media media = storeIfPresent(file);
-        return memoryService.submit(user, day, answer, mood, media.url(), media.type());
+        MediaProcessor.ProcessedMedia media = mediaProcessor.process(file);
+        return memoryService.submit(user, day, answer, mood,
+                media != null ? media.url() : null,
+                media != null ? media.type() : null,
+                media != null ? media.thumbnailUrl() : null);
     }
 
     @PatchMapping("/{id}")
@@ -115,18 +118,6 @@ public class MemoryController {
     }
 
     // ----- helpers -----
-
-    private record Media(String url, String type) {
-    }
-
-    private Media storeIfPresent(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return new Media(null, null);
-        }
-        String url = fileStorageService.store(file);
-        String type = (file.getContentType() != null && file.getContentType().startsWith("video/")) ? "VIDEO" : "PHOTO";
-        return new Media(url, type);
-    }
 
     private User currentUser(Authentication auth) {
         UserDetails details = (UserDetails) auth.getPrincipal();

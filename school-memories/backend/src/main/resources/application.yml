@@ -42,6 +42,22 @@ keepsake:
     secret: ${JWT_SECRET:dev-only-secret-please-override-in-production-0123456789abcdef}
     expiration-ms: ${JWT_EXPIRATION_MS:604800000} # 7 days
   upload-dir: ${UPLOAD_DIR:./data/uploads}
+  # Where uploaded media lives. local = disk under upload-dir (served at /uploads/*);
+  # s3 = any S3-compatible object store (see keepsake.storage.s3.*).
+  storage:
+    type: ${STORAGE_TYPE:local}
+    s3:
+      endpoint: ${S3_ENDPOINT:}
+      region: ${S3_REGION:}
+      access-key: ${S3_ACCESS_KEY:}
+      secret-key: ${S3_SECRET_KEY:}
+      bucket: ${S3_BUCKET:}
+      # Optional CDN/proxy origin for public URLs; defaults to endpoint + bucket.
+      public-base-url: ${S3_PUBLIC_BASE_URL:}
+  # Optional ffmpeg binary used to extract poster frames from uploaded videos.
+  # Leave empty to skip poster generation.
+  media:
+    ffmpeg-path: ${FFMPEG_PATH:}
   # Google sign-in. Leave GOOGLE_CLIENT_ID unset to hide the button.
   google:
     client-id: ${GOOGLE_CLIENT_ID:}

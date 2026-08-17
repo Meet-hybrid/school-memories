@@ -20,6 +20,7 @@ loud and competitive.
 | Authentication (register, login, logout, email verify, password reset, JWT, roles) | ✅ |
 | Google sign-in (Identity Services ID tokens, verified locally against Google JWKS) | ✅ |
 | Email delivery (SMTP via spring-boot-starter-mail; console-log mode in dev) | ✅ |
+| Media pipeline (image thumbnails, video poster frames via FFmpeg, local or S3 storage) | ✅ |
 | User profiles (photo, name, nickname, school, set, grad year, bio, stats) | ✅ |
 | 30-day challenge (configurable questions, answer any day, edit/delete, progress) | ✅ |
 | Memory posts (text, photo/video upload, mood, soft-delete) | ✅ |
@@ -181,9 +182,13 @@ school-memories/
    console and the API returns them, so the full flows are testable without SMTP.
    A hosted sender (SES/Postmark) drops in behind the same interface.
 
-6. **Files on disk via `FileStorageService`.** Media URLs are stored in Postgres; the
-   bytes live under `UPLOAD_DIR` and are served at `/uploads/*`. Swapping to S3/GCS is
-   a change to one class. Content types are whitelisted and sizes capped at 15 MB.
+6. **Swappable storage via `StorageService`.** Media URLs are stored in Postgres;
+   the bytes live either on local disk (`keepsake.storage.type=local`, served at
+   `/uploads/*`) or in any S3-compatible object store (`type=s3`, via the MinIO
+   client — works with AWS S3, MinIO, DigitalOcean Spaces…). Content types are
+   whitelisted and sizes capped at 15 MB. A `MediaProcessor` generates a JPEG
+   thumbnail for large photos (ImageIO) and a poster frame for videos when FFmpeg
+   is available — previews ride along as `thumbnailUrl` so feeds stay light.
 
 7. **Configurable questions from day one.** The 30 questions are seed data, not code —
    admins can add/rename/reorder/hide days from the admin panel. The timeline endpoint
@@ -262,12 +267,13 @@ leaderboards, search, admin dashboard, Docker, tests, docs.
 
 **Version 2 — planned:** memory games (Guess Who,
 Guess the Teacher, School Trivia, School Bingo), polls, throwback photo contest,
-Memory of the Week, yearbook builder (v1), better moderation tooling, media pipeline
-improvements (thumbnails, video transcoding, S3 storage).
+Memory of the Week, yearbook builder (v1), better moderation tooling, video
+transcoding to HLS.
 
 **Version 2 — shipped so far:** Google OAuth (local JWKS verification, button on
 login/register, one-time school onboarding); real email delivery (SMTP, HTML
-verification/reset emails with absolute links).
+verification/reset emails with absolute links); media pipeline (image thumbnails,
+FFmpeg video posters, S3-compatible storage via `STORAGE_TYPE=s3`).
 
 **Version 3 — planned:** digital yearbook PDF, time capsules, reunion planning
 (countdown + RSVP), interactive school map with memories pinned to locations, advanced
@@ -279,6 +285,8 @@ analytics, multi-school theming.
 
 - Email needs SMTP credentials configured (`MAIL_ENABLED=true` + `SMTP_*`) to go
   beyond console logging.
+- Videos are served as uploaded; no transcoding to HLS yet (poster frames need
+  `FFMPEG_PATH` set).
 - No CSRF concerns because auth is header-based; JWT lives in `localStorage` (see
   decision #4).
 - Feed pagination exists but the UI loads one page; profile loads all memories.

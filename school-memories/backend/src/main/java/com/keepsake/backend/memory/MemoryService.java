@@ -44,7 +44,8 @@ public class MemoryService {
     // ----- challenge submission -----
 
     @Transactional
-    public MemoryDto submit(User user, int dayNumber, String answer, String mood, String mediaUrl, String mediaType) {
+    public MemoryDto submit(User user, int dayNumber, String answer, String mood, String mediaUrl, String mediaType,
+                           String thumbnailUrl) {
         user = managed(user);
         ChallengeQuestion question = questionRepository.findByDayNumber(dayNumber)
                 .orElseThrow(() -> ApiException.notFound("There is no challenge question for day " + dayNumber));
@@ -69,6 +70,7 @@ public class MemoryService {
         memory.setMood(mood);
         memory.setMediaUrl(mediaUrl);
         memory.setMediaType(mediaType);
+        memory.setThumbnailUrl(thumbnailUrl);
         memoryRepository.save(memory);
 
         notificationService.notifyAchievements(user);
@@ -88,6 +90,8 @@ public class MemoryService {
         if (mediaUrl != null) {
             memory.setMediaUrl(mediaUrl);
             memory.setMediaType(mediaType);
+            // A new media file has no matching preview yet; fall back to the full file.
+            memory.setThumbnailUrl(null);
         }
         memoryRepository.save(memory);
         long likes = reactionRepository.countByMemoryId(memoryId);

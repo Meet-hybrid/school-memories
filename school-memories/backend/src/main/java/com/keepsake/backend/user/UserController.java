@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.keepsake.backend.common.ApiException;
-import com.keepsake.backend.common.FileStorageService;
 import com.keepsake.backend.common.PageResponse;
+import com.keepsake.backend.common.StorageService;
 
 import jakarta.validation.Valid;
 
@@ -29,13 +29,13 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final FileStorageService fileStorageService;
+    private final StorageService storageService;
     private final MemoryService memoryService;
 
-    public UserController(UserService userService, FileStorageService fileStorageService,
+    public UserController(UserService userService, StorageService storageService,
                           MemoryService memoryService) {
         this.userService = userService;
-        this.fileStorageService = fileStorageService;
+        this.storageService = storageService;
         this.memoryService = memoryService;
     }
 
@@ -54,7 +54,7 @@ public class UserController {
         if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
             throw ApiException.badRequest("Avatar must be an image");
         }
-        return userService.setAvatar(currentUserId(auth), fileStorageService.store(file));
+        return userService.setAvatar(currentUserId(auth), storageService.store(file));
     }
 
     @GetMapping("/{handle}")

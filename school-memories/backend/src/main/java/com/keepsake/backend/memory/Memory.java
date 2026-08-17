@@ -62,6 +62,10 @@ public class Memory {
     @Column(name = "media_type", length = 20)
     private String mediaType;
 
+    /** Lightweight preview (image thumbnail or video poster) shown in feeds. */
+    @Column(name = "thumbnail_url", length = 500)
+    private String thumbnailUrl;
+
     /** Soft delete: keeps reactions/comments/notifications intact while hiding the post. */
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
@@ -146,6 +150,14 @@ public class Memory {
 
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public boolean isDeleted() {

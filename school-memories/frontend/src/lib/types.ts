@@ -72,6 +72,7 @@ export interface MemoryDto {
   mood?: string | null;
   mediaUrl?: string | null;
   mediaType?: 'PHOTO' | 'VIDEO' | null;
+  thumbnailUrl?: string | null;
   likes: number;
   comments: number;
   likedByMe: boolean;

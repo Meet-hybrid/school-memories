@@ -41,17 +41,22 @@ export default function MemoryCard({ memory, schoolName }: { memory: MemoryDto; 
       {/* answer */}
       <p className="prose-memory whitespace-pre-wrap">{memory.answer}</p>
 
-      {/* media */}
+      {/* media — feeds load the generated preview; the full file is one click away */}
       {memory.mediaUrl && memory.mediaType === 'PHOTO' && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={memory.mediaUrl}
+          src={memory.thumbnailUrl || memory.mediaUrl}
           alt=""
           className="mt-4 max-h-96 w-full rounded-sm object-cover"
         />
       )}
       {memory.mediaUrl && memory.mediaType === 'VIDEO' && (
-        <video src={memory.mediaUrl} controls className="mt-4 max-h-96 w-full rounded-sm bg-black" />
+        <video
+          src={memory.mediaUrl}
+          poster={memory.thumbnailUrl || undefined}
+          controls
+          className="mt-4 max-h-96 w-full rounded-sm bg-black"
+        />
       )}
 
       {/* mood */}

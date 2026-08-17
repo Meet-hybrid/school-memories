@@ -18,6 +18,7 @@ loud and competitive.
 | Area | Status |
 | --- | --- |
 | Authentication (register, login, logout, email verify, password reset, JWT, roles) | ✅ |
+| Google sign-in (Identity Services ID tokens, verified locally against Google JWKS) | ✅ |
 | User profiles (photo, name, nickname, school, set, grad year, bio, stats) | ✅ |
 | 30-day challenge (configurable questions, answer any day, edit/delete, progress) | ✅ |
 | Memory posts (text, photo/video upload, mood, soft-delete) | ✅ |
@@ -34,7 +35,7 @@ loud and competitive.
 | Integration tests (auth, challenge, social, admin) | ✅ |
 
 **Planned but deliberately not built yet** (marked in the roadmap at the bottom, not faked):
-Google OAuth, real SMTP email, Guess-Who/Trivia/Bingo games, polls, throwback photo
+real SMTP email, Guess-Who/Trivia/Bingo games, polls, throwback photo
 contests, Memory of the Week, digital yearbook generation, time capsules, reunion
 planning, interactive school maps, multi-school theming, PDF generation.
 
@@ -93,6 +94,17 @@ npm run dev        # http://localhost:3000
 
 The frontend proxies `/api/*` and `/uploads/*` to the backend, so no CORS setup is
 needed locally.
+
+### Google sign-in (optional)
+
+Set `GOOGLE_CLIENT_ID` on the backend (or in `docker-compose.yml`) to a Google
+OAuth client ID from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+(Web application type; authorized JavaScript origin = your frontend URL). The
+login and register pages then show a "Continue with Google" button — the
+frontend fetches `/api/auth/oauth-config` to discover whether it's enabled.
+Google ID tokens are verified locally against Google's JWKS (cached 24h), so no
+network call is needed per login. New Google accounts pick their school on a
+one-time onboarding screen; sign-in joins an existing account with the same email.
 
 ### Demo accounts
 
@@ -244,10 +256,13 @@ timeline) is built to pull people toward reading and writing memories.
 submissions, feed, likes, comments, uploads, follow, notifications, achievements,
 leaderboards, search, admin dashboard, Docker, tests, docs.
 
-**Version 2 — planned:** Google OAuth, real email delivery, memory games (Guess Who,
+**Version 2 — planned:** real email delivery, memory games (Guess Who,
 Guess the Teacher, School Trivia, School Bingo), polls, throwback photo contest,
 Memory of the Week, yearbook builder (v1), better moderation tooling, media pipeline
 improvements (thumbnails, video transcoding, S3 storage).
+
+**Version 2 — shipped so far:** Google OAuth (local JWKS verification, button on
+login/register, one-time school onboarding).
 
 **Version 3 — planned:** digital yearbook PDF, time capsules, reunion planning
 (countdown + RSVP), interactive school map with memories pinned to locations, advanced
@@ -257,7 +272,6 @@ analytics, multi-school theming.
 
 ## Known MVP limitations (honest list)
 
-- Google authentication not implemented (marked planned).
 - Email is log-only; no real delivery yet.
 - No CSRF concerns because auth is header-based; JWT lives in `localStorage` (see
   decision #4).

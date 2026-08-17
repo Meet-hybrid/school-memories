@@ -2,6 +2,7 @@ package com.keepsake.backend.auth;
 
 import com.keepsake.backend.auth.AuthDtos.AuthResponse;
 import com.keepsake.backend.auth.AuthDtos.ForgotPasswordRequest;
+import com.keepsake.backend.auth.AuthDtos.GoogleLoginRequest;
 import com.keepsake.backend.auth.AuthDtos.Identity;
 import com.keepsake.backend.auth.AuthDtos.LoginRequest;
 import com.keepsake.backend.auth.AuthDtos.RegisterRequest;
@@ -10,6 +11,7 @@ import com.keepsake.backend.common.ApiException;
 import com.keepsake.backend.user.User;
 import com.keepsake.backend.user.UserRepository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +30,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final String googleClientId;
 
-    public AuthController(AuthService authService, UserRepository userRepository) {
+    public AuthController(AuthService authService,
+                          UserRepository userRepository,
+                          @Value("${keepsake.google.client-id:}") String googleClientId) {
         this.authService = authService;
         this.userRepository = userRepository;
+        this.googleClientId = googleClientId == null ? "" : googleClientId.trim();
     }
 
     @PostMapping("/register")
@@ -42,6 +48,18 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest req) {
         return authService.login(req);
+    }
+
+    @PostMapping("/google")
+    public AuthResponse google(@Valid @RequestBody GoogleLoginRequest req) {
+        return authService.googleLogin(req.idToken());
+    }
+
+    /** Public: tells the frontend whether to render the Google button and with which client id. */
+    @GetMapping("/oauth-config")
+    public AuthDtos.OAuthConfig oauthConfig() {
+        boolean enabled = !googleClientId.isBlank();
+        return new AuthDtos.OAuthConfig(enabled, enabled ? googleClientId : null);
     }
 
     @PostMapping("/logout")

@@ -29,6 +29,7 @@ services:
       DB_PASSWORD: keepsake
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please-0123456789abcdef}
       UPLOAD_DIR: /data/uploads
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     volumes:
       - uploads:/data/uploads
     depends_on:

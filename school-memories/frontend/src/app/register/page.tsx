@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import type { School } from '@/lib/types';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -62,7 +63,10 @@ export default function RegisterPage() {
         Use your real name — the whole point is that your classmates find you.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-10 flex flex-col gap-5">
+      <GoogleSignInButton />
+      <p className="text-center text-xs text-ink/40">Sign in with Google and we'll ask for your school next.</p>
+
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="label">Full name</span>

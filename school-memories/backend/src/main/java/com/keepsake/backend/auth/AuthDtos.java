@@ -28,6 +28,13 @@ public final class AuthDtos {
     public record LoginRequest(@NotBlank String email, @NotBlank String password) {
     }
 
+    public record GoogleLoginRequest(@NotBlank String idToken) {
+    }
+
+    /** Whether the Google sign-in button should be shown, and with which client id. */
+    public record OAuthConfig(boolean enabled, String clientId) {
+    }
+
     public record ForgotPasswordRequest(@NotBlank @Email String email) {
     }
 

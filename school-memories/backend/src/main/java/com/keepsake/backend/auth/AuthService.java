@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.keepsake.backend.auth.AuthDtos.AuthResponse;
 import com.keepsake.backend.auth.AuthDtos.LoginRequest;
 import com.keepsake.backend.auth.AuthDtos.RegisterRequest;
+import com.keepsake.backend.auth.GoogleIdTokenVerifier.GoogleUser;
 import com.keepsake.backend.common.ApiException;
 import com.keepsake.backend.common.MailService;
 import com.keepsake.backend.security.JwtService;
@@ -30,19 +31,22 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final MailService mailService;
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
     public AuthService(UserRepository userRepository,
                        SchoolRepository schoolRepository,
                        ClassSetRepository classSetRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       MailService mailService) {
+                       MailService mailService,
+                       GoogleIdTokenVerifier googleIdTokenVerifier) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.classSetRepository = classSetRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.mailService = mailService;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
     }
 
     @Transactional
@@ -102,6 +106,48 @@ public class AuthService {
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
             throw ApiException.unauthorized("Invalid email or password");
         }
+        String token = jwtService.generateToken(user.getId(), user.getRole().name());
+        return new AuthResponse(token, AuthResponse.identity(user), null);
+    }
+
+    /**
+     * Signs in (or creates) a user from a Google ID token. The email is the
+     * identity key: a Google sign-in joins an existing password account with the
+     * same email. New accounts have no school yet — the frontend routes them to
+     * onboarding so they can pick one.
+     */
+    @Transactional
+    public AuthResponse googleLogin(String idToken) {
+        GoogleUser google = googleIdTokenVerifier.verify(idToken);
+
+        User user = userRepository.findByEmailIgnoreCase(google.email()).orElse(null);
+        if (user == null) {
+            String email = google.email().trim().toLowerCase();
+            String fullName = google.name() == null || google.name().isBlank()
+                    ? email.substring(0, email.indexOf('@'))
+                    : google.name().trim();
+            user = new User();
+            user.setEmail(email);
+            // Random unguessable password: this account can only sign in via Google.
+            user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setFullName(fullName);
+            user.setUsername(uniqueUsername(email, fullName));
+            user.setAvatarUrl(google.picture());
+            user.setVerified(google.emailVerified());
+            user.setActive(true);
+            userRepository.save(user);
+        } else {
+            if (!user.isActive()) {
+                throw ApiException.forbidden("This account has been deactivated");
+            }
+            // Google verified this email; adopt a profile picture if the user has none.
+            user.setVerified(true);
+            if ((user.getAvatarUrl() == null || user.getAvatarUrl().isBlank()) && google.picture() != null) {
+                user.setAvatarUrl(google.picture());
+            }
+            userRepository.save(user);
+        }
+
         String token = jwtService.generateToken(user.getId(), user.getRole().name());
         return new AuthResponse(token, AuthResponse.identity(user), null);
     }

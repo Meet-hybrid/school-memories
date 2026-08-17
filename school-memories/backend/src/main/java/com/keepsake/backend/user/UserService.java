@@ -105,6 +105,15 @@ public class UserService {
         if (req.graduationYear() != null) {
             u.setGraduationYear(req.graduationYear());
         }
+        if (req.schoolId() != null) {
+            School school = schoolRepository.findById(req.schoolId())
+                    .orElseThrow(() -> ApiException.badRequest("Unknown school"));
+            u.setSchool(school);
+            // A set from another school no longer makes sense; drop it.
+            if (u.getClassSet() != null && !u.getClassSet().getSchool().getId().equals(school.getId())) {
+                u.setClassSet(null);
+            }
+        }
         if (req.classSetId() != null) {
             ClassSet set = classSetRepository.findById(req.classSetId())
                     .orElseThrow(() -> ApiException.badRequest("Unknown set"));
@@ -185,6 +194,6 @@ public class UserService {
     // ----- DTO -----
 
     public record UpdateProfileRequest(String fullName, String nickname, String username, String bio,
-                                       String avatarUrl, Long classSetId, Integer graduationYear) {
+                                       String avatarUrl, Long schoolId, Long classSetId, Integer graduationYear) {
     }
 }

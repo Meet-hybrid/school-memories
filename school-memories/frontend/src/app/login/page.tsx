@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -35,7 +36,9 @@ export default function LoginPage() {
         Your classmates have been posting. Catch up on what they remember.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-10 flex flex-col gap-5">
+      <GoogleSignInButton />
+
+      <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-5">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="label">Email</span>
           <input

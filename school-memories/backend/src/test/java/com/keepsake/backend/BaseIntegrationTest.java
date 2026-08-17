@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "keepsake.jwt.secret=test-secret-test-secret-test-secret-test-secret-test-secret",
-        "keepsake.upload-dir=./target/test-uploads"
+        "keepsake.upload-dir=./target/test-uploads",
+        "keepsake.google.client-id=test-google-client-id"
 })
 public abstract class BaseIntegrationTest {
 

@@ -28,6 +28,9 @@ keepsake:
     secret: ${JWT_SECRET:dev-only-secret-please-override-in-production-0123456789abcdef}
     expiration-ms: ${JWT_EXPIRATION_MS:604800000} # 7 days
   upload-dir: ${UPLOAD_DIR:./data/uploads}
+  # Google sign-in. Leave GOOGLE_CLIENT_ID unset to hide the button.
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
   # When true, verification / password-reset links are returned by the API and
   # logged to the console instead of emailed. Switches to a real mail sender later.
   mail:

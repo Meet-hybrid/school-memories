@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
+                                "/api/auth/google",
+                                "/api/auth/oauth-config",
                                 "/api/auth/logout",
                                 "/api/auth/verify-email",
                                 "/api/auth/forgot-password",

@@ -67,6 +67,9 @@ export const api = {
     request<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: { email: string; password: string }) =>
     request<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+  googleSignIn: (idToken: string) =>
+    request<AuthResponse>('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
+  oauthConfig: () => request<OAuthConfig>('/api/auth/oauth-config'),
   me: () => request<AuthResponse['user']>('/api/auth/me'),
   verifyEmail: (token: string) => request<void>(`/api/auth/verify-email?token=${encodeURIComponent(token)}`),
   forgotPassword: (email: string) =>
@@ -168,6 +171,11 @@ export const api = {
       body: JSON.stringify({ name, graduationYear }),
     }),
 };
+
+export interface OAuthConfig {
+  enabled: boolean;
+  clientId: string | null;
+}
 
 export interface AdminUserRow {
   id: number;

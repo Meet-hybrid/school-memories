@@ -7,6 +7,10 @@ RUN npm ci --no-audit --no-fund
 # ---- build ----
 FROM node:22-alpine AS build
 WORKDIR /app
+# Next.js bakes NEXT_PUBLIC_* values (including the /api rewrite target) at
+# build time, so the backend URL must be passed here — not only at runtime.
+ARG NEXT_PUBLIC_API_URL=http://localhost:8080
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

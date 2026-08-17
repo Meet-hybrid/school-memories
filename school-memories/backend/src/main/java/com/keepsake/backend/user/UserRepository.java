@@ -1,5 +1,6 @@
 package com.keepsake.backend.user;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPasswordResetToken(String token);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    List<User> findBySchoolIdAndActiveTrueAndIdNot(Long schoolId, Long id);
+
+    Optional<User> findFirstBySchoolIdAndIdNot(Long schoolId, Long id);
+
+    Optional<User> findFirstBySchoolIdAndClassSetIdAndIdNot(Long schoolId, Long classSetId, Long id);
+
+    Optional<User> findFirstBySchoolIdAndGraduationYearAndIdNot(Long schoolId, Integer graduationYear, Long id);
+
+    Optional<User> findFirstBySchoolIdAndAvatarUrlIsNotNullAndIdNot(Long schoolId, Long id);
+
+    Optional<User> findFirstBySchoolIdAndBioIsNotNullAndIdNot(Long schoolId, Long id);
+
+    Optional<User> findFirstBySchoolIdAndIdNotAndIdNotIn(Long schoolId, Long id, Collection<Long> ids);
 
     @Query("""
             select u from User u

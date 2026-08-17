@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.keepsake.backend.game.GamePlayerRepository;
 import com.keepsake.backend.memory.CommentRepository;
 import com.keepsake.backend.memory.MemoryRepository;
 import com.keepsake.backend.user.Role;
@@ -22,12 +23,14 @@ public class LeaderboardService {
     private final UserRepository userRepository;
     private final MemoryRepository memoryRepository;
     private final CommentRepository commentRepository;
+    private final GamePlayerRepository gamePlayerRepository;
 
     public LeaderboardService(UserRepository userRepository, MemoryRepository memoryRepository,
-                              CommentRepository commentRepository) {
+                              CommentRepository commentRepository, GamePlayerRepository gamePlayerRepository) {
         this.userRepository = userRepository;
         this.memoryRepository = memoryRepository;
         this.commentRepository = commentRepository;
+        this.gamePlayerRepository = gamePlayerRepository;
     }
 
     @Transactional(readOnly = true)
@@ -44,6 +47,8 @@ public class LeaderboardService {
                 case "likes" -> memoryRepository.countLikesReceived(u.getId());
                 case "comments" -> commentRepository.countByUserId(u.getId());
                 case "streak" -> AchievementService.longestStreak(memoryRepository.findAllByUserIdOrderByDay(u.getId()));
+                case "games" -> gamePlayerRepository.findByUserId(u.getId())
+                        .map(p -> (long) p.total()).orElse(0L);
                 default -> 0;
             };
             entries.add(new Entry(u.getId(), displayName(u), u.getAvatarUrl(), value));

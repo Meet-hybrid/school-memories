@@ -21,6 +21,7 @@ loud and competitive.
 | Google sign-in (Identity Services ID tokens, verified locally against Google JWKS) | ✅ |
 | Email delivery (SMTP via spring-boot-starter-mail; console-log mode in dev) | ✅ |
 | Media pipeline (image thumbnails, video poster frames via FFmpeg, local or S3 storage) | ✅ |
+| Memory games (Guess Who, School Trivia, Classmate Bingo with scores + leaderboard) | ✅ |
 | User profiles (photo, name, nickname, school, set, grad year, bio, stats) | ✅ |
 | 30-day challenge (configurable questions, answer any day, edit/delete, progress) | ✅ |
 | Memory posts (text, photo/video upload, mood, soft-delete) | ✅ |
@@ -37,9 +38,9 @@ loud and competitive.
 | Integration tests (auth, challenge, social, admin) | ✅ |
 
 **Planned but deliberately not built yet** (marked in the roadmap at the bottom, not faked):
-Guess-Who/Trivia/Bingo games, polls, throwback photo
-contests, Memory of the Week, digital yearbook generation, time capsules, reunion
-planning, interactive school maps, multi-school theming, PDF generation.
+polls, throwback photo contests, Memory of the Week, digital yearbook generation,
+time capsules, reunion planning, interactive school maps, multi-school theming,
+PDF generation.
 
 ---
 
@@ -220,7 +221,8 @@ school-memories/
 | Social | `POST /api/memories/{id}/reactions` · `GET/POST /api/memories/{id}/comments` · `DELETE .../comments/{cid}` |
 | Users | `GET /api/users/{handle}` · `GET /api/users/{id}/memories` · `POST /api/users/{id}/follow` · `POST /api/users/{id}/unfollow` · `GET /api/users/search` · `GET /api/users/suggested` · `PATCH /api/users/me` · `POST /api/users/me/avatar` |
 | Notifications | `GET /api/notifications` · `GET /api/notifications/unread-count` · `PATCH /api/notifications/{id}/read` · `PATCH /api/notifications/read-all` |
-| Achievements | `GET /api/achievements/me` · `GET /api/leaderboards?type=memories\|likes\|comments\|streak` |
+| Achievements | `GET /api/achievements/me` · `GET /api/leaderboards?type=memories\|likes\|comments\|streak\|games` |
+| Games | `GET /api/games/guess-who` · `POST .../guess-who/{id}/guess` · `GET /api/games/trivia/next` · `POST .../trivia/{id}/answer` · `GET /api/games/bingo` · `POST .../bingo/claim` · `GET /api/games/score` · `GET /api/games/leaderboard` |
 | Announcements | `GET /api/announcements` |
 | Admin | `GET /api/admin/stats` · users/schools/questions/memories/comments/announcements management |
 
@@ -265,15 +267,16 @@ timeline) is built to pull people toward reading and writing memories.
 submissions, feed, likes, comments, uploads, follow, notifications, achievements,
 leaderboards, search, admin dashboard, Docker, tests, docs.
 
-**Version 2 — planned:** memory games (Guess Who,
-Guess the Teacher, School Trivia, School Bingo), polls, throwback photo contest,
-Memory of the Week, yearbook builder (v1), better moderation tooling, video
-transcoding to HLS.
+**Version 2 — planned:** polls, throwback photo contest, Memory of the Week,
+yearbook builder (v1), better moderation tooling, video transcoding to HLS.
 
 **Version 2 — shipped so far:** Google OAuth (local JWKS verification, button on
 login/register, one-time school onboarding); real email delivery (SMTP, HTML
 verification/reset emails with absolute links); media pipeline (image thumbnails,
-FFmpeg video posters, S3-compatible storage via `STORAGE_TYPE=s3`).
+FFmpeg video posters, S3-compatible storage via `STORAGE_TYPE=s3`); memory games
+(Guess Who over real memories, admin-curated School Trivia with global or
+school-scoped questions, and Classmate Bingo whose squares are verified
+server-side against the archive — scores feed a games leaderboard).
 
 **Version 3 — planned:** digital yearbook PDF, time capsules, reunion planning
 (countdown + RSVP), interactive school map with memories pinned to locations, advanced

@@ -17,6 +17,8 @@ import com.keepsake.backend.announcement.Announcement;
 import com.keepsake.backend.announcement.AnnouncementRepository;
 import com.keepsake.backend.challenge.ChallengeQuestion;
 import com.keepsake.backend.challenge.ChallengeQuestionRepository;
+import com.keepsake.backend.game.TriviaQuestion;
+import com.keepsake.backend.game.TriviaQuestionRepository;
 import com.keepsake.backend.memory.Comment;
 import com.keepsake.backend.memory.CommentRepository;
 import com.keepsake.backend.memory.Memory;
@@ -51,16 +53,22 @@ public class DataSeeder implements ApplicationRunner {
     private final MemoryRepository memoryRepository;
     private final ReactionRepository reactionRepository;
     private final CommentRepository commentRepository;
-    private final FollowRepository followRepository;
-    private final AnnouncementRepository announcementRepository;
+    private final FollowRepository followRepository;    private final AnnouncementRepository announcementRepository;
     private final AchievementService achievementService;
+    private final TriviaQuestionRepository triviaQuestionRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(UserRepository userRepository, SchoolRepository schoolRepository,
-                      ClassSetRepository classSetRepository, ChallengeQuestionRepository questionRepository,
-                      MemoryRepository memoryRepository, ReactionRepository reactionRepository,
-                      CommentRepository commentRepository, FollowRepository followRepository,
-                      AnnouncementRepository announcementRepository, AchievementService achievementService,
+    public DataSeeder(UserRepository userRepository,
+                      SchoolRepository schoolRepository,
+                      ClassSetRepository classSetRepository,
+                      ChallengeQuestionRepository questionRepository,
+                      MemoryRepository memoryRepository,
+                      ReactionRepository reactionRepository,
+                      CommentRepository commentRepository,
+                      FollowRepository followRepository,
+                      AnnouncementRepository announcementRepository,
+                      AchievementService achievementService,
+                      TriviaQuestionRepository triviaQuestionRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
@@ -72,6 +80,7 @@ public class DataSeeder implements ApplicationRunner {
         this.followRepository = followRepository;
         this.announcementRepository = announcementRepository;
         this.achievementService = achievementService;
+        this.triviaQuestionRepository = triviaQuestionRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -104,6 +113,7 @@ public class DataSeeder implements ApplicationRunner {
 
         seedQuestions();
         seedMemories(classmates);
+        seedTrivia(school);
         achievementService.seedDefinitions();
         for (User u : classmates) {
             achievementService.checkAndUnlock(u);
@@ -204,6 +214,35 @@ public class DataSeeder implements ApplicationRunner {
                 questionRepository.save(q);
             }
         }
+    }
+
+    private void seedTrivia(School school) {
+        if (triviaQuestionRepository.count() > 0) {
+            return;
+        }
+        // Questions whose answers are verifiable against the seeded demo data above.
+        trivia( school, "How many questions are in the 30-day challenge?",
+                List.of("30", "20", "50", "100"), 0);
+        trivia(school, "Which Greenfield set graduated in 2019?",
+                List.of("Set of 2019", "Set of 2020", "Set of 2021", "Set of 2022"), 0);
+        trivia(school, "Who was Greenfield's debate team captain?",
+                List.of("Ada Obi", "Chidi Okonkwo", "George Appiah", "Emeka Nwosu"), 1);
+        trivia(school, "Which classmate was nicknamed \"Miss Calculator\"?",
+                List.of("Daniella Mensah", "Hana Yusuf", "Fatima Bello", "Bisi Adeyemi"), 2);
+        trivia(school, "Where is Greenfield's famous mango tree?",
+                List.of("The school field", "Behind the science block", "By the gate", "Next to the library"), 1);
+        trivia(school, "Which classmate was called \"Quiet Storm\"?",
+                List.of("Bisi Adeyemi", "Chidi Okonkwo", "Emeka Nwosu", "Ada Obi"), 0);
+        log.info("Seeded {} trivia questions.", triviaQuestionRepository.count());
+    }
+
+    private void trivia(School school, String question, List<String> options, int correctIndex) {
+        TriviaQuestion t = new TriviaQuestion();
+        t.setSchool(school);
+        t.setQuestion(question);
+        t.setOptions(options);
+        t.setCorrectIndex(correctIndex);
+        triviaQuestionRepository.save(t);
     }
 
     private void seedMemories(List<User> classmates) {

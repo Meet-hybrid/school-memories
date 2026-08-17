@@ -16,6 +16,8 @@ import com.keepsake.backend.challenge.ChallengeQuestion;
 import com.keepsake.backend.challenge.ChallengeQuestionRepository;
 import com.keepsake.backend.common.ApiException;
 import com.keepsake.backend.common.PageResponse;
+import com.keepsake.backend.game.TriviaQuestion;
+import com.keepsake.backend.game.TriviaQuestionRepository;
 import com.keepsake.backend.memory.Comment;
 import com.keepsake.backend.memory.CommentRepository;
 import com.keepsake.backend.memory.Memory;
@@ -38,6 +40,7 @@ public class AdminService {
     private final MemoryRepository memoryRepository;
     private final CommentRepository commentRepository;
     private final AnnouncementRepository announcementRepository;
+    private final TriviaQuestionRepository triviaQuestionRepository;
 
     public AdminService(UserRepository userRepository,
                         SchoolRepository schoolRepository,
@@ -45,7 +48,8 @@ public class AdminService {
                         ChallengeQuestionRepository questionRepository,
                         MemoryRepository memoryRepository,
                         CommentRepository commentRepository,
-                        AnnouncementRepository announcementRepository) {
+                        AnnouncementRepository announcementRepository,
+                        TriviaQuestionRepository triviaQuestionRepository) {
         this.userRepository = userRepository;
         this.schoolRepository = schoolRepository;
         this.classSetRepository = classSetRepository;
@@ -53,6 +57,7 @@ public class AdminService {
         this.memoryRepository = memoryRepository;
         this.commentRepository = commentRepository;
         this.announcementRepository = announcementRepository;
+        this.triviaQuestionRepository = triviaQuestionRepository;
     }
 
     // ----- stats -----
@@ -228,6 +233,47 @@ public class AdminService {
         commentRepository.save(c);
     }
 
+    // ----- trivia -----
+
+    @Transactional(readOnly = true)
+    public List<TriviaRow> trivia() {
+        return triviaQuestionRepository.findAllByOrderByCreatedAtDesc().stream().map(TriviaRow::from).toList();
+    }
+
+    @Transactional
+    public TriviaRow createTrivia(Long adminId, String question, List<String> options, int correctIndex) {
+        if (question == null || question.isBlank()) {
+            throw ApiException.badRequest("Question text is required");
+        }
+        if (options == null || options.size() != 4 || options.stream().anyMatch(o -> o == null || o.isBlank())) {
+            throw ApiException.badRequest("Provide exactly four non-empty answer options");
+        }
+        if (correctIndex < 0 || correctIndex > 3) {
+            throw ApiException.badRequest("correctIndex must be between 0 and 3");
+        }
+        TriviaQuestion t = new TriviaQuestion();
+        t.setQuestion(question.trim());
+        t.setOptions(options.stream().map(String::trim).toList());
+        t.setCorrectIndex(correctIndex);
+        t.setSchool(userRepository.findById(adminId).map(User::getSchool).orElse(null));
+        return TriviaRow.from(triviaQuestionRepository.save(t));
+    }
+
+    @Transactional
+    public TriviaRow updateTrivia(Long id, Boolean active) {
+        TriviaQuestion t = triviaQuestionRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Trivia question not found"));
+        if (active != null) {
+            t.setActive(active);
+        }
+        return TriviaRow.from(triviaQuestionRepository.save(t));
+    }
+
+    @Transactional
+    public void deleteTrivia(Long id) {
+        triviaQuestionRepository.deleteById(id);
+    }
+
     // ----- announcements -----
 
     @Transactional(readOnly = true)
@@ -288,6 +334,14 @@ public class AdminService {
     public record QuestionRow(Long id, int dayNumber, String question, String hint, boolean active) {
         static QuestionRow from(ChallengeQuestion q) {
             return new QuestionRow(q.getId(), q.getDayNumber(), q.getQuestion(), q.getHint(), q.isActive());
+        }
+    }
+
+    public record TriviaRow(Long id, String question, List<String> options, int correctIndex,
+                            boolean active, String schoolName, java.time.LocalDateTime createdAt) {
+        static TriviaRow from(TriviaQuestion t) {
+            return new TriviaRow(t.getId(), t.getQuestion(), t.getOptions(), t.getCorrectIndex(),
+                    t.isActive(), t.getSchool() != null ? t.getSchool().getName() : null, t.getCreatedAt());
         }
     }
 }

@@ -1,17 +1,26 @@
 import type {
   AchievementDto,
   AdminStats,
+  AdminTriviaRow,
   Announcement,
   AuthResponse,
+  BingoCardDto,
   ChallengeTimeline,
+  ClaimResult,
   ClassSet,
   CommentDto,
   DayDetail,
+  GameLeaderboardRow,
+  GameScore,
+  GuessWhoResult,
+  GuessWhoRound,
   LeaderboardEntry,
   MemoryDto,
   NotificationDto,
   PageResponse,
   School,
+  TriviaResult,
+  TriviaRound,
   UserDto,
 } from './types';
 
@@ -141,6 +150,20 @@ export const api = {
   myAchievements: () => request<AchievementDto[]>('/api/achievements/me'),
   leaderboard: (type: string) => request<LeaderboardEntry[]>(`/api/leaderboards?type=${type}&limit=10`),
 
+  // games
+  guessWhoRound: () => request<GuessWhoRound>('/api/games/guess-who'),
+  guessWho: (memoryId: number, userId: number) =>
+    request<GuessWhoResult>(`/api/games/guess-who/${memoryId}/guess`, { method: 'POST', body: JSON.stringify({ userId }) }),
+  triviaNext: () => request<TriviaRound>('/api/games/trivia/next'),
+  answerTrivia: (questionId: number, optionIndex: number) =>
+    request<TriviaResult>(`/api/games/trivia/${questionId}/answer`, { method: 'POST', body: JSON.stringify({ optionIndex }) }),
+  bingoCard: () => request<BingoCardDto>('/api/games/bingo'),
+  claimBingo: (rule: string) =>
+    request<ClaimResult>('/api/games/bingo/claim', { method: 'POST', body: JSON.stringify({ rule }) }),
+  regenerateBingo: () => request<BingoCardDto>('/api/games/bingo/regenerate', { method: 'POST' }),
+  gameScore: () => request<GameScore>('/api/games/score'),
+  gameLeaderboard: () => request<GameLeaderboardRow[]>('/api/games/leaderboard?limit=10'),
+
   // admin
   adminStats: () => request<AdminStats>('/api/admin/stats'),
   adminUsers: (q: string) => request<PageResponse<AdminUserRow>>(`/api/admin/users?q=${encodeURIComponent(q)}&size=100`),
@@ -170,6 +193,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ name, graduationYear }),
     }),
+  adminTrivia: () => request<AdminTriviaRow[]>('/api/admin/games/trivia'),
+  adminCreateTrivia: (body: { question: string; options: string[]; correctIndex: number }) =>
+    request<AdminTriviaRow>('/api/admin/games/trivia', { method: 'POST', body: JSON.stringify(body) }),
+  adminUpdateTrivia: (id: number, active: boolean) =>
+    request<AdminTriviaRow>(`/api/admin/games/trivia/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) }),
+  adminDeleteTrivia: (id: number) => request<void>(`/api/admin/games/trivia/${id}`, { method: 'DELETE' }),
 };
 
 export interface OAuthConfig {

@@ -31,7 +31,7 @@ public class AchievementController {
     @GetMapping("/leaderboards")
     public List<LeaderboardService.Entry> leaderboard(@RequestParam(defaultValue = "memories") String type,
                                                       @RequestParam(defaultValue = "10") int limit) {
-        if (!List.of("memories", "likes", "comments", "streak").contains(type)) {
+        if (!List.of("memories", "likes", "comments", "streak", "games").contains(type)) {
             type = "memories";
         }
         return leaderboardService.top(type, limit);

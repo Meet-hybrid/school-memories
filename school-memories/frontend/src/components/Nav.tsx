@@ -13,6 +13,7 @@ import { useState } from 'react';
 const LINKS = [
   { href: '/feed', label: 'Feed' },
   { href: '/challenge', label: 'Challenge' },
+  { href: '/games', label: 'Games' },
   { href: '/discover', label: 'Classmates' },
 ];
 

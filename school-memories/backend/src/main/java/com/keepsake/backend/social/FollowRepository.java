@@ -1,5 +1,6 @@
 package com.keepsake.backend.social;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     long countByFollowerId(Long followerId);
 
     long countByFollowingId(Long followingId);
+
+    List<Follow> findByFollowerId(Long followerId);
 
     Page<Follow> findByFollowerIdOrderByCreatedAtDesc(Long followerId, Pageable pageable);
 

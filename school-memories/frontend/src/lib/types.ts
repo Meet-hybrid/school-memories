@@ -167,3 +167,91 @@ export interface AdminStats {
   questions: number;
   announcements: number;
 }
+
+// ----- games -----
+
+export interface GuessWhoOption {
+  userId: number;
+  name: string;
+  nickname?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface GuessWhoRound {
+  memoryId: number;
+  dayNumber: number;
+  question?: string | null;
+  answer: string;
+  options: GuessWhoOption[];
+}
+
+export interface GuessWhoResult {
+  correct: boolean;
+  correctUserId: number;
+  correctName: string;
+  guessWhoCorrect: number;
+}
+
+export interface TriviaRound {
+  questionId: number;
+  question: string;
+  options: string[];
+}
+
+export interface TriviaResult {
+  correct: boolean;
+  triviaCorrect: number;
+}
+
+export interface GameMatched {
+  userId: number;
+  name: string;
+  nickname?: string | null;
+  username?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface BingoCell {
+  rule: string;
+  prompt: string;
+  done: boolean;
+  matched?: GameMatched | null;
+}
+
+export interface BingoCardDto {
+  cells: BingoCell[];
+  completedCount: number;
+  bingo: boolean;
+}
+
+export interface ClaimResult {
+  rule: string;
+  done: boolean;
+  bingo: boolean;
+  bingosCompleted: number;
+  matched?: GameMatched | null;
+}
+
+export interface GameScore {
+  guessWhoCorrect: number;
+  triviaCorrect: number;
+  bingosCompleted: number;
+  total: number;
+}
+
+export interface GameLeaderboardRow {
+  userId: number;
+  name: string;
+  avatarUrl?: string | null;
+  total: number;
+}
+
+export interface AdminTriviaRow {
+  id: number;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  active: boolean;
+  schoolName?: string | null;
+  createdAt: string;
+}

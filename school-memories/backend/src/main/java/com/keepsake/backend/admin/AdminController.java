@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.keepsake.backend.admin.AdminService.CommentRow;
 import com.keepsake.backend.admin.AdminService.MemoryRow;
 import com.keepsake.backend.admin.AdminService.QuestionRow;
+import com.keepsake.backend.admin.AdminService.TriviaRow;
 import com.keepsake.backend.admin.AdminService.UserRow;
 import com.keepsake.backend.announcement.Announcement;
 import com.keepsake.backend.challenge.ChallengeQuestion;
@@ -119,6 +121,28 @@ public class AdminController {
         adminService.deleteComment(id);
     }
 
+    // ----- games: trivia -----
+
+    @GetMapping("/games/trivia")
+    public List<TriviaRow> trivia() {
+        return adminService.trivia();
+    }
+
+    @PostMapping("/games/trivia")
+    public TriviaRow createTrivia(Authentication auth, @Valid @RequestBody TriviaRequest req) {
+        return adminService.createTrivia(currentUserId(auth), req.question(), req.options(), req.correctIndex());
+    }
+
+    @PatchMapping("/games/trivia/{id}")
+    public TriviaRow updateTrivia(@PathVariable Long id, @RequestBody TriviaUpdateRequest req) {
+        return adminService.updateTrivia(id, req.active());
+    }
+
+    @DeleteMapping("/games/trivia/{id}")
+    public void deleteTrivia(@PathVariable Long id) {
+        adminService.deleteTrivia(id);
+    }
+
     // ----- announcements -----
 
     @GetMapping("/announcements")
@@ -148,5 +172,17 @@ public class AdminController {
     }
 
     public record AnnouncementRequest(@NotBlank String title, @NotBlank String body) {
+    }
+
+    public record TriviaRequest(@NotBlank String question,
+                                @NotNull List<@NotBlank String> options,
+                                @NotNull @jakarta.validation.constraints.Min(0) @jakarta.validation.constraints.Max(3) Integer correctIndex) {
+    }
+
+    public record TriviaUpdateRequest(Boolean active) {
+    }
+
+    private Long currentUserId(Authentication auth) {
+        return Long.valueOf(((org.springframework.security.core.userdetails.UserDetails) auth.getPrincipal()).getUsername());
     }
 }

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: school-memories
+    runtime: docker
+    plan: free
+    branch: master
+    region: oregon
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend

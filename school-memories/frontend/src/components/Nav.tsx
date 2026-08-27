@@ -35,8 +35,8 @@ export default function Nav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex h-16 min-w-0 max-w-6xl items-center justify-between gap-2 px-4 sm:px-5">
+        <div className="min-w-0 flex-1">
           <Wordmark />
           {user && (
             <nav className="hidden items-center gap-6 md:flex">
@@ -49,7 +49,7 @@ export default function Nav() {
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-4">
           <button
             onClick={toggle}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-ink/60 transition-colors hover:border-ink/40 hover:text-ink"
@@ -101,11 +101,12 @@ export default function Nav() {
             </>
           ) : (
             <>
-              <Link href="/login" className="btn-quiet">
+              <Link href="/login" className="btn-quiet !px-2.5 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:!text-sm">
                 Sign in
               </Link>
-              <Link href="/register" className="btn-primary">
-                Join your school
+              <Link href="/register" className="btn-primary !px-2.5 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:!text-sm">
+                <span className="sm:hidden">Join</span>
+                <span className="hidden sm:inline">Join your school</span>
               </Link>
             </>
           )}

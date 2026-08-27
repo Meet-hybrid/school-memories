@@ -29,7 +29,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-5 py-16">
+    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-5 py-10 sm:min-h-[70vh] sm:py-16">
       <p className="label mb-3">Welcome back</p>
       <h1 className="font-serif text-4xl font-medium">Sign in</h1>
       <p className="mt-3 text-sm leading-6 text-ink/55">

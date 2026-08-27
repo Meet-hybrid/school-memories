@@ -11,7 +11,7 @@ export default function Footer() {
             Thirty questions. One school. A permanent archive of the people we were.
           </p>
         </div>
-        <div className="flex gap-8 text-sm text-ink/50">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink/50">
           <Link href="/challenge" className="hover:text-ink">
             The Challenge
           </Link>

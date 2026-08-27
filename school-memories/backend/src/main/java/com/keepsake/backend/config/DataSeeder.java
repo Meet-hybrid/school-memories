@@ -47,6 +47,9 @@ public class DataSeeder implements ApplicationRunner {
     @Value("${keepsake.school.name:Character Training Secondary School}")
     private String configuredSchoolName;
 
+    @Value("${keepsake.admin.email:admin@greenfield.demo}")
+    private String configuredAdminEmail;
+
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
     private static final String DEMO_PASSWORD = "password123";
 
@@ -95,6 +98,12 @@ public class DataSeeder implements ApplicationRunner {
             school.setName(configuredSchoolName);
             schoolRepository.save(school);
         });
+        userRepository.findByEmailIgnoreCase("admin@greenfield.demo").ifPresent(admin -> {
+            if (!admin.getEmail().equalsIgnoreCase(configuredAdminEmail)) {
+                admin.setEmail(configuredAdminEmail);
+                userRepository.save(admin);
+            }
+        });
         if (questionRepository.count() > 0) {
             log.info("Demo data already present — skipping seed.");
             return;
@@ -108,7 +117,7 @@ public class DataSeeder implements ApplicationRunner {
         ClassSet set2020 = setOrCreate(school, "Set of 2020", 2020);
         ClassSet set2021 = setOrCreate(school, "Set of 2021", 2021);
 
-        User admin = userOrCreate("admin@greenfield.demo", "Admin", "Admin", null, school, null, Role.ADMIN, true);
+        User admin = userOrCreate(configuredAdminEmail, "Admin", "Admin", null, school, null, Role.ADMIN, true);
         List<User> classmates = List.of(
                 userOrCreate("ada@greenfield.demo", "Ada Obi", "Ada", "ada", school, set2019, Role.USER, true),
                 userOrCreate("bisi@greenfield.demo", "Bisi Adeyemi", "Bisi", "bisi", school, set2019, Role.USER, true),

@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.keepsake.backend.achievement.AchievementService;
 import com.keepsake.backend.common.PageResponse;
@@ -41,6 +42,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyFollowed(User recipient, User actor) {
         if (!recipient.getId().equals(actor.getId())) {
             notify(recipient, actor, "FOLLOW",

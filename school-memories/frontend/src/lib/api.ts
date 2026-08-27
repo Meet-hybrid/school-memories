@@ -66,7 +66,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     }
     throw new ApiError(res.status, message);
   }
-  if (res.status === 204) return undefined as T;
+  // Several successful commands (follow, delete, mark-read, etc.) return
+  // 200/204 with no response body. Do not try to parse an empty body as JSON.
+  if (res.status === 204 || !res.headers.get('content-type')?.includes('application/json')) {
+    return undefined as T;
+  }
   return (await res.json()) as T;
 }
 

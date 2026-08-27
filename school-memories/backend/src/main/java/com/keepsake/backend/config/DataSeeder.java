@@ -99,21 +99,22 @@ public class DataSeeder implements ApplicationRunner {
             school.setName(configuredSchoolName);
             schoolRepository.save(school);
         });
-        schoolRepository.findByNameIgnoreCase(configuredSchoolName).ifPresent(this::ensureCurrentClassSets);
+        School school = schoolRepository.findByNameIgnoreCase(configuredSchoolName)
+                .orElseGet(() -> schoolOrCreate(configuredSchoolName,
+                        "Our school is not just a building — it's 40 years of stories."));
+        ensureCurrentClassSets(school);
         userRepository.findByEmailIgnoreCase("admin@greenfield.demo").ifPresent(admin -> {
             if (!admin.getEmail().equalsIgnoreCase(configuredAdminEmail)) {
                 admin.setEmail(configuredAdminEmail);
                 userRepository.save(admin);
             }
         });
+        ensureConfiguredAdmin(school);
         if (questionRepository.count() > 0) {
             log.info("Demo data already present — skipping seed.");
             return;
         }
         log.info("Seeding demo data (school, classmates, 30 questions, sample memories)...");
-
-        School school = schoolOrCreate(configuredSchoolName,
-                "Our school is not just a building — it's 40 years of stories.");
 
         ClassSet set2019 = setOrCreate(school, "Set of 2019", 2019);
         ClassSet set2020 = setOrCreate(school, "Set of 2020", 2020);
@@ -221,6 +222,22 @@ public class DataSeeder implements ApplicationRunner {
             u.setActive(true);
             return userRepository.save(u);
         });
+    }
+
+    /** Ensures a configured admin is present even when the database was seeded previously. */
+    private void ensureConfiguredAdmin(School school) {
+        User admin = userRepository.findByEmailIgnoreCase(configuredAdminEmail).orElse(null);
+        if (admin == null) {
+            userOrCreate(configuredAdminEmail, "Admin", "Admin", null, school, null, Role.ADMIN, true);
+            return;
+        }
+        admin.setRole(Role.ADMIN);
+        admin.setVerified(true);
+        admin.setActive(true);
+        if (admin.getSchool() == null) {
+            admin.setSchool(school);
+        }
+        userRepository.save(admin);
     }
 
     private void seedQuestions() {

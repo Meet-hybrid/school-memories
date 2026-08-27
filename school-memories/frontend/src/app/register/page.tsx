@@ -87,7 +87,7 @@ export default function RegisterPage() {
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="label">School invite code</span>
-          <input required value={form.inviteCode} onChange={(e) => set('inviteCode', e.target.value)} className="input" placeholder="CTSS-2026" autoComplete="off" />
+          <input type="password" required value={form.inviteCode} onChange={(e) => set('inviteCode', e.target.value)} className="input" placeholder="Enter your invite code" autoComplete="off" />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">

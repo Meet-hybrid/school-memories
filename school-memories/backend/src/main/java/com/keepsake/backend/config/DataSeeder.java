@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,9 @@ import com.keepsake.backend.user.UserRepository;
  */
 @Component
 public class DataSeeder implements ApplicationRunner {
+
+    @Value("${keepsake.school.name:Character Training Secondary School}")
+    private String configuredSchoolName;
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
     private static final String DEMO_PASSWORD = "password123";
@@ -87,13 +91,17 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        schoolRepository.findByNameIgnoreCase("Greenfield High").ifPresent(school -> {
+            school.setName(configuredSchoolName);
+            schoolRepository.save(school);
+        });
         if (questionRepository.count() > 0) {
             log.info("Demo data already present — skipping seed.");
             return;
         }
         log.info("Seeding demo data (school, classmates, 30 questions, sample memories)...");
 
-        School school = schoolOrCreate("Greenfield High",
+        School school = schoolOrCreate(configuredSchoolName,
                 "Our school is not just a building — it's 40 years of stories.");
 
         ClassSet set2019 = setOrCreate(school, "Set of 2019", 2019);
@@ -119,7 +127,7 @@ public class DataSeeder implements ApplicationRunner {
             achievementService.checkAndUnlock(u);
         }
 
-        announcementOrCreate("Welcome to Greenfield's memory archive",
+        announcementOrCreate("Welcome to Character Training's memory archive",
                 "This is our school's first digital yearbook. Answer a question a day and let's fill it with stories — thirty questions, thirty days, one school.");
         announcementOrCreate("Photo contest coming soon",
                 "We're planning a throwback photo contest. Dig out your old school photos — the best ones will live in the archive forever.");

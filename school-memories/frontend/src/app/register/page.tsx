@@ -20,6 +20,7 @@ export default function RegisterPage() {
     schoolId: '',
     classSetId: '',
     graduationYear: '',
+    inviteCode: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,6 +47,7 @@ export default function RegisterPage() {
         schoolId: Number(form.schoolId),
         classSetId: form.classSetId ? Number(form.classSetId) : null,
         graduationYear: form.graduationYear ? Number(form.graduationYear) : null,
+        inviteCode: form.inviteCode,
       });
       router.replace('/challenge');
     } catch (err) {
@@ -60,7 +62,7 @@ export default function RegisterPage() {
       <p className="label mb-3">The challenge starts here</p>
       <h1 className="font-serif text-4xl font-medium">Join your school</h1>
       <p className="mt-3 text-sm leading-6 text-ink/55">
-        Use your real name — the whole point is that your classmates find you.
+        Character Training Secondary School classmates only. Use your real name so people can find you.
       </p>
 
       <GoogleSignInButton />
@@ -81,6 +83,11 @@ export default function RegisterPage() {
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="label">Email</span>
           <input type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} className="input" placeholder="you@example.com" autoComplete="email" />
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="label">School invite code</span>
+          <input required value={form.inviteCode} onChange={(e) => set('inviteCode', e.target.value)} className="input" placeholder="CTSS-2026" autoComplete="off" />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">

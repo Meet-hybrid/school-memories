@@ -22,7 +22,8 @@ public final class AuthDtos {
             String nickname,
             @NotNull Long schoolId,
             Long classSetId,
-            Integer graduationYear) {
+            Integer graduationYear,
+            String inviteCode) {
     }
 
     public record LoginRequest(@NotBlank String email, @NotBlank String password) {

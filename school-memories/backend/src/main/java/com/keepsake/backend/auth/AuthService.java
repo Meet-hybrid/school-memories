@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,12 @@ import com.keepsake.backend.user.UserRepository;
 
 @Service
 public class AuthService {
+
+    @Value("${keepsake.school.name:Character Training Secondary School}")
+    private String configuredSchoolName;
+
+    @Value("${keepsake.school.invite-code:}")
+    private String configuredInviteCode;
 
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
@@ -51,6 +58,10 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
+        if (!configuredInviteCode.isBlank()
+                && !configuredInviteCode.equals(req.inviteCode() == null ? "" : req.inviteCode().trim())) {
+            throw ApiException.forbidden("A valid school invite code is required");
+        }
         String email = req.email() == null ? "" : req.email().trim().toLowerCase();
         if (email.isBlank()) {
             throw ApiException.badRequest("Email is required");
@@ -65,7 +76,7 @@ public class AuthService {
             throw ApiException.badRequest("Full name is required");
         }
 
-        School school = schoolRepository.findById(req.schoolId())
+        School school = schoolRepository.findByNameIgnoreCase(configuredSchoolName)
                 .orElseThrow(() -> ApiException.badRequest("Unknown school"));
         ClassSet set = null;
         if (req.classSetId() != null) {

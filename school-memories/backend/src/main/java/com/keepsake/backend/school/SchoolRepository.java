@@ -9,4 +9,6 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
     List<School> findByActiveTrueOrderByNameAsc();
 
     boolean existsByNameIgnoreCase(String name);
+
+    java.util.Optional<School> findByNameIgnoreCase(String name);
 }

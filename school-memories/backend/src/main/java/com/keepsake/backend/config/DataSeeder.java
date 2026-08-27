@@ -50,6 +50,9 @@ public class DataSeeder implements ApplicationRunner {
     @Value("${keepsake.admin.email:admin@greenfield.demo}")
     private String configuredAdminEmail;
 
+    @Value("${keepsake.admin.password:}")
+    private String configuredAdminPassword;
+
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
     private static final String DEMO_PASSWORD = "password123";
 
@@ -228,7 +231,11 @@ public class DataSeeder implements ApplicationRunner {
     private void ensureConfiguredAdmin(School school) {
         User admin = userRepository.findByEmailIgnoreCase(configuredAdminEmail).orElse(null);
         if (admin == null) {
-            userOrCreate(configuredAdminEmail, "Admin", "Admin", null, school, null, Role.ADMIN, true);
+            admin = userOrCreate(configuredAdminEmail, "Admin", "Admin", null, school, null, Role.ADMIN, true);
+            if (configuredAdminPassword != null && !configuredAdminPassword.isBlank()) {
+                admin.setPasswordHash(passwordEncoder.encode(configuredAdminPassword));
+                userRepository.save(admin);
+            }
             return;
         }
         admin.setRole(Role.ADMIN);
@@ -236,6 +243,11 @@ public class DataSeeder implements ApplicationRunner {
         admin.setActive(true);
         if (admin.getSchool() == null) {
             admin.setSchool(school);
+        }
+        // A non-empty ADMIN_PASSWORD is an explicit operator-requested reset.
+        // Leave it unset in normal operation so restarts never overwrite passwords.
+        if (configuredAdminPassword != null && !configuredAdminPassword.isBlank()) {
+            admin.setPasswordHash(passwordEncoder.encode(configuredAdminPassword));
         }
         userRepository.save(admin);
     }

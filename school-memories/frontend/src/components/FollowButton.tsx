@@ -16,7 +16,8 @@ export default function FollowButton({ userId, following }: { userId: number; fo
     mutationFn: () => (isFollowing ? api.unfollow(userId) : api.follow(userId)),
     onMutate: () => setIsFollowing((v) => !v),
     onError: () => setIsFollowing(following),
-    onSuccess: () => {
+    onSuccess: (profile) => {
+      setIsFollowing(profile.following);
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['suggested'] });
     },

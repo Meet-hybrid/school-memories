@@ -146,8 +146,8 @@ export const api = {
     request<UserDto>('/api/users/me', { method: 'PATCH', body: JSON.stringify(body) }),
   uploadAvatar: (form: FormData) => request<UserDto>('/api/users/me/avatar', { method: 'POST', body: form }),
   userMemories: (id: number) => request<MemoryDto[]>(`/api/users/${id}/memories`),
-  follow: (id: number) => request<void>(`/api/users/${id}/follow`, { method: 'POST' }),
-  unfollow: (id: number) => request<void>(`/api/users/${id}/unfollow`, { method: 'POST' }),
+  follow: (id: number) => request<UserDto>(`/api/users/${id}/follow`, { method: 'POST' }),
+  unfollow: (id: number) => request<UserDto>(`/api/users/${id}/unfollow`, { method: 'POST' }),
   search: (params: Record<string, string | number | undefined>) => {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {

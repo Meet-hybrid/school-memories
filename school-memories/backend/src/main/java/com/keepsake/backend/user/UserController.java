@@ -70,13 +70,17 @@ public class UserController {
     // ----- follow -----
 
     @PostMapping("/{id}/follow")
-    public void follow(@PathVariable Long id, Authentication auth) {
-        userService.follow(currentUserId(auth), id);
+    public UserDto follow(@PathVariable Long id, Authentication auth) {
+        Long viewerId = currentUserId(auth);
+        userService.follow(viewerId, id);
+        return userService.profile(viewerId, id);
     }
 
     @PostMapping("/{id}/unfollow")
-    public void unfollow(@PathVariable Long id, Authentication auth) {
-        userService.unfollow(currentUserId(auth), id);
+    public UserDto unfollow(@PathVariable Long id, Authentication auth) {
+        Long viewerId = currentUserId(auth);
+        userService.unfollow(viewerId, id);
+        return userService.profile(viewerId, id);
     }
 
     @GetMapping("/{id}/followers")

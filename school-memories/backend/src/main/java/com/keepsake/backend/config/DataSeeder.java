@@ -99,6 +99,7 @@ public class DataSeeder implements ApplicationRunner {
             school.setName(configuredSchoolName);
             schoolRepository.save(school);
         });
+        schoolRepository.findByNameIgnoreCase(configuredSchoolName).ifPresent(this::ensureCurrentClassSets);
         userRepository.findByEmailIgnoreCase("admin@greenfield.demo").ifPresent(admin -> {
             if (!admin.getEmail().equalsIgnoreCase(configuredAdminEmail)) {
                 admin.setEmail(configuredAdminEmail);
@@ -117,6 +118,7 @@ public class DataSeeder implements ApplicationRunner {
         ClassSet set2019 = setOrCreate(school, "Set of 2019", 2019);
         ClassSet set2020 = setOrCreate(school, "Set of 2020", 2020);
         ClassSet set2021 = setOrCreate(school, "Set of 2021", 2021);
+        ensureCurrentClassSets(school);
 
         User admin = userOrCreate(configuredAdminEmail, "Admin", "Admin", null, school, null, Role.ADMIN, true);
         List<User> classmates = List.of(
@@ -193,6 +195,13 @@ public class DataSeeder implements ApplicationRunner {
                     cs.setGraduationYear(year);
                     return classSetRepository.save(cs);
                 });
+    }
+
+    /** Keeps the registration dropdown useful for the current school archive. */
+    private void ensureCurrentClassSets(School school) {
+        for (int year = 2010; year <= 2026; year++) {
+            setOrCreate(school, "Set of " + year, year);
+        }
     }
 
     private User userOrCreate(String email, String fullName, String nickname, String username,

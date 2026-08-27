@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.data.domain.PageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ import com.keepsake.backend.social.FollowRepository;
 
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
@@ -150,8 +154,14 @@ public class UserService {
         Follow follow = new Follow();
         follow.setFollower(follower);
         follow.setFollowing(following);
-        followRepository.save(follow);
-        notificationService.notifyFollowed(following, follower);
+        // Flush the relationship before creating the optional notification so a
+        // notification problem cannot make a successful follow appear undone.
+        followRepository.saveAndFlush(follow);
+        try {
+            notificationService.notifyFollowed(following, follower);
+        } catch (RuntimeException ex) {
+            log.warn("Could not create follow notification for user {}", followingId, ex);
+        }
     }
 
     @Transactional

@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import ServiceStatusBanner from '@/components/ServiceStatusBanner';
 
 export const metadata: Metadata = {
   title: {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Providers>
           <Nav />
+          <ServiceStatusBanner />
           <main className="flex-1">{children}</main>
           <Footer />
         </Providers>

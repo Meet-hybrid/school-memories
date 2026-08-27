@@ -53,7 +53,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers.set('Content-Type', 'application/json');
   }
 
-  const res = await fetch(path, { ...options, headers, cache: 'no-store' });
+  let res: Response;
+  try {
+    res = await fetch(path, { ...options, headers, cache: 'no-store' });
+  } catch {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('keepsake:service-unavailable', {
+        detail: { message: 'The service is temporarily unavailable. Please try again in a moment.' },
+      }));
+    }
+    throw new ApiError(0, 'The service is temporarily unavailable. Please try again in a moment.');
+  }
+
+  if ([502, 503, 504].includes(res.status) && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('keepsake:service-unavailable', {
+      detail: { message: `The service is temporarily unavailable (${res.status}). Please try again in a moment.` },
+    }));
+  }
 
   if (!res.ok) {
     let message = `Request failed (${res.status})`;

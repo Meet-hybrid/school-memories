@@ -94,6 +94,7 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        migrateBranding();
         schoolRepository.findByNameIgnoreCase("Greenfield High").ifPresent(school -> {
             school.setName(configuredSchoolName);
             schoolRepository.save(school);
@@ -155,6 +156,30 @@ public class DataSeeder implements ApplicationRunner {
                     s.setDescription(description);
                     return schoolRepository.save(s);
                 });
+    }
+
+    /** Updates legacy demo wording already stored in a database before seeding exits. */
+    private void migrateBranding() {
+        announcementRepository.findAll().forEach(announcement -> {
+            String title = replaceLegacyBrand(announcement.getTitle());
+            String body = replaceLegacyBrand(announcement.getBody());
+            if (!title.equals(announcement.getTitle()) || !body.equals(announcement.getBody())) {
+                announcement.setTitle(title);
+                announcement.setBody(body);
+                announcementRepository.save(announcement);
+            }
+        });
+        triviaQuestionRepository.findAll().forEach(question -> {
+            String text = replaceLegacyBrand(question.getQuestion());
+            if (!text.equals(question.getQuestion())) {
+                question.setQuestion(text);
+                triviaQuestionRepository.save(question);
+            }
+        });
+    }
+
+    private String replaceLegacyBrand(String text) {
+        return text == null ? null : text.replace("Greenfield", configuredSchoolName);
     }
 
     private ClassSet setOrCreate(School school, String name, int year) {
@@ -240,13 +265,13 @@ public class DataSeeder implements ApplicationRunner {
         // Questions whose answers are verifiable against the seeded demo data above.
         trivia( school, "How many questions are in the 30-day challenge?",
                 List.of("30", "20", "50", "100"), 0);
-        trivia(school, "Which Greenfield set graduated in 2019?",
+        trivia(school, "Which Character Training set graduated in 2019?",
                 List.of("Set of 2019", "Set of 2020", "Set of 2021", "Set of 2022"), 0);
-        trivia(school, "Who was Greenfield's debate team captain?",
+        trivia(school, "Who was Character Training's debate team captain?",
                 List.of("Ada Obi", "Chidi Okonkwo", "George Appiah", "Emeka Nwosu"), 1);
         trivia(school, "Which classmate was nicknamed \"Miss Calculator\"?",
                 List.of("Daniella Mensah", "Hana Yusuf", "Fatima Bello", "Bisi Adeyemi"), 2);
-        trivia(school, "Where is Greenfield's famous mango tree?",
+        trivia(school, "Where is Character Training's famous mango tree?",
                 List.of("The school field", "Behind the science block", "By the gate", "Next to the library"), 1);
         trivia(school, "Which classmate was called \"Quiet Storm\"?",
                 List.of("Bisi Adeyemi", "Chidi Okonkwo", "Emeka Nwosu", "Ada Obi"), 0);

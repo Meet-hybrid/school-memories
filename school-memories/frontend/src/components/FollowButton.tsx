@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import type { UserDto } from '@/lib/types';
 
 export default function FollowButton({ userId, following }: { userId: number; following: boolean }) {
   const queryClient = useQueryClient();
@@ -18,6 +19,21 @@ export default function FollowButton({ userId, following }: { userId: number; fo
     onError: () => setIsFollowing(following),
     onSuccess: (profile) => {
       setIsFollowing(profile.following);
+
+      // Apply the server response immediately so profile counts update without
+      // waiting for the invalidated query to finish refetching.
+      queryClient.setQueriesData<UserDto>({ queryKey: ['profile'] }, (current) =>
+        current?.id === profile.id
+          ? { ...current, following: profile.following, followers: profile.followers, followingCount: profile.followingCount }
+          : current,
+      );
+      queryClient.setQueryData<UserDto[]>(['suggested'], (current) =>
+        current?.map((user) =>
+          user.id === profile.id
+            ? { ...user, following: profile.following, followers: profile.followers, followingCount: profile.followingCount }
+            : user,
+        ),
+      );
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['suggested'] });
     },
